@@ -119,9 +119,9 @@ class Excel:
 		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + vmmd + "\n")
 		f.close()
 
-	def build_virtual_interfaces_6b(self,short_tenant,vrf,vfw,vnic,vccontroller):
+	def build_virtual_interfaces_6b(self,short_tenant,vrf,vfw,fwinterface,vnic,vccontroller):
 		f = open("6b.csv", "a")
-		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + vfw + "," +  "CDV_" + short_tenant + "_L4L7_" + vfw + "_vNIC" + vnic + "," + "Network adapter " + vnic + "," "CDV_" + short_tenant + "_L4L7_" + vfw + "," + vccontroller + "\n")
+		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + vfw + "," +  "CDI_" + vfw + "_" + fwinterface + "," + "Network adapter " + vnic + "," "CDV_" + short_tenant + "_L4L7_" + vfw + "," + vccontroller + "\n")
 		f.close()
 
 	def build_cluster_interfaces_6cSymm(self,short_tenant,vrf,vrf_to_fw):
@@ -130,13 +130,13 @@ class Excel:
 
 		# Print interfaces 1-4
 		for x in range (0,4):
-			f.write("CDV_SOE_L4L7_" + vrf_to_fw[short_tenant + "_" + vrf][x][0] + "_vNIC" + vrf_to_fw[short_tenant + "_" + vrf][x][1] + ",")
+			f.write("CDI_" + vrf_to_fw[short_tenant + "_" + vrf][x][0] + "_" + vrf_to_fw[short_tenant + "_" + vrf][x][2]  + ",")
 
 		f.write("CLS_" + short_tenant + "_PFW_" + vrf )
 
 		# Print cluster devices
 		for x in range (0,4):
-			f.write(",CDV_SOE_L4L7_" + vrf_to_fw[short_tenant + "_" + vrf][x][0])
+			f.write(",CDV_" + short_tenant + "_L4L7_" + vrf_to_fw[short_tenant + "_" + vrf][x][0])
 
 		f.write("\n")
 		f.close()
@@ -145,15 +145,15 @@ class Excel:
 		f = open("6c-NoSymm.csv", "a")
 		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," )
 
-		# Print interfaces 1-4
+		# Print interfaces 1-2
 		for x in range (0,2):
-			f.write("CDV_SOE_L4L7_" + vrf_to_fw[short_tenant + "_" + vrf][x][0] + "_vNIC" + vrf_to_fw[short_tenant + "_" + vrf][x][1] + ",")
+			f.write("CDI_" + vrf_to_fw[short_tenant + "_" + vrf][x][0] + "_" + vrf_to_fw[short_tenant + "_" + vrf][x][2] + ",")
 
 		f.write("CLS_" + short_tenant + "_PFW_" + vrf)
 
 		# Print cluster devices
 		for x in range (0,2):
-			f.write(",CDV_SOE_L4L7_" + vrf_to_fw[short_tenant + "_" + vrf][x][0])
+			f.write(",CDV_" + short_tenant + "_L4L7_" + vrf_to_fw[short_tenant + "_" + vrf][x][0])
 
 		f.write("\n")
 		f.close()
@@ -255,11 +255,15 @@ class Excel:
 				vnic_cell = 'O' + str(x)
 				vnic = str(ws[vnic_cell].value)
 
+				fwinterface_cell = 'F' + str(x)
+				fwinterface = ws[fwinterface_cell].value
+				fwinterface = fwinterface.replace("/", "_")
+
 				if 	short_tenant + "_" + vrf not in vrf_to_fw:
 					vrf_to_fw[short_tenant + "_" + vrf] = []
 
 				if vfw not in vrf_to_fw[short_tenant + "_" + vrf]:
-					vrf_to_fw[short_tenant + "_" + vrf].append([vfw,vnic])
+					vrf_to_fw[short_tenant + "_" + vrf].append([vfw,vnic,fwinterface])
 
 		for tenant_vrf in vrf_to_fw:
 			tvdata = tenant_vrf.split("_")
@@ -271,10 +275,10 @@ class Excel:
 
 			# 6C - create cluster interfaces - depending if symmetric or non symmetric PBR being used
 			if short_tenant + "_" + vrf in self.list_of_non_symm_vrf:
-				self.build_cluster_interfaces_6cNoSymm(short_tenant, vrf, vfw, vrf_to_fw)
+				self.build_cluster_interfaces_6cNoSymm(short_tenant, vrf, vfw, vrf_to_fw,fwinterface)
 				logging.info("%s_%s building concrete devices for non symmetric PBR" % (short_tenant, vrf))
 			else:
-				self.build_cluster_interfaces_6cSymm(short_tenant, vrf, vrf_to_fw)
+				self.build_cluster_interfaces_6cSymm(short_tenant, vrf, vrf_to_fw,fwinterface)
 				logging.info("%s_%s building concrete devices for symmetric PBR" % (short_tenant, vrf))
 
 			# 7 - Build SGT
@@ -312,7 +316,7 @@ class Excel:
 			if vfw is None:
 				continue
 
-			if bool(re.search('ZPP', vfw, re.IGNORECASE)):
+			if bool(re.search('PPFW', vfw, re.IGNORECASE)):
 				tenant_cell = 'I' + str(x)
 				long_tenant = ws[tenant_cell].value
 				t_x = long_tenant.split("_")
@@ -326,8 +330,12 @@ class Excel:
 				vnic_cell = 'O' + str(x)
 				vnic = str(ws[vnic_cell].value)
 
+				fwinterface_cell = 'F' + str(x)
+				fwinterface = ws[fwinterface_cell].value
+				fwinterface = fwinterface.replace("/","_")
+
 				# 6B - build interfaces
-				self.build_virtual_interfaces_6b(short_tenant, vrf, vfw, vnic, self.vccontroller)
+				self.build_virtual_interfaces_6b(short_tenant, vrf, vfw, fwinterface,vnic, self.vccontroller)
 
 
 def read_arguments():
