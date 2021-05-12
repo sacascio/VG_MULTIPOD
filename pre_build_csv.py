@@ -241,7 +241,7 @@ class Excel:
 			if vfw is None:
 				continue
 
-			if bool(re.search('ZPP', vfw, re.IGNORECASE)):
+			if bool(re.search('PPFW', vfw, re.IGNORECASE)):
 				tenant_cell = 'I' + str(x)
 				long_tenant = ws[tenant_cell].value
 				t_x = long_tenant.split("_")
