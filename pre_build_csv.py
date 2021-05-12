@@ -40,26 +40,28 @@ class Excel:
 
 		self.bd_to_ip = {}
 
-		self.bd_to_ip["SOE_ACC"] = "10.178.79.145"
-		self.bd_to_ip["SOE_B2B"] = "10.178.79.49"
-		self.bd_to_ip["SOE_BSC"] = "10.178.79.65"
-		self.bd_to_ip["SOE_COM"] = "10.178.79.17"
-		self.bd_to_ip["SOE_DAT"] = "10.178.79.81"
-		self.bd_to_ip["SOE_ITC"] = "10.178.79.33"
 		self.bd_to_ip["SOE_VXR"] = "10.178.79.1"
-		self.bd_to_ip["SOE_DST"] = "10.178.79.97"
-		self.bd_to_ip["SOE_INF"] = "10.178.79.113"
-		self.bd_to_ip["SOE_PTM"] = "10.178.79.129"
-		self.bd_to_ip["SDE_D2B"] = "10.178.95.1"
+		self.bd_to_ip["SOE_COM"] = "10.178.79.17"
+		self.bd_to_ip["SOE_ITC"] = "10.178.79.33"
+		self.bd_to_ip["SOE_BSC"] = "10.178.79.49"
+		self.bd_to_ip["SOE_PTM"] = "10.178.79.65"
+		self.bd_to_ip["SOE_ACC"] = "10.178.79.81"
+		self.bd_to_ip["SOE_DAT"] = "10.178.79.97"
+		self.bd_to_ip["SOE_DST"] = "10.178.79.113"
+		self.bd_to_ip["SOE_INF"] = "10.178.79.129"
+		self.bd_to_ip["SOE_B2B"] = "10.178.79.145"
+
+		self.bd_to_ip["SDE_SDE"] = "10.178.95.1"
 		self.bd_to_ip["SDE_LDZ"] = "10.178.95.17"
 		self.bd_to_ip["SDE_PTD"] = "10.178.95.33"
-		self.bd_to_ip["SDE_SDE"] = "10.178.95.49"
+		self.bd_to_ip["SDE_D2B"] = "10.178.95.49"
+
 		self.bd_to_ip["GIS_COM"] = "10.178.111.1"
 		self.bd_to_ip["GIS_BSC"] = "10.178.111.17"
-		self.bd_to_ip["GIS_DST"] = "10.178.111.33"
-		self.bd_to_ip["GIS_ENT"] = "10.178.111.49"
-		self.bd_to_ip["GIS_MMP"] = "10.178.111.65"
-		self.bd_to_ip["GIS_PTM"] = "10.178.111.81"
+		self.bd_to_ip["GIS_ENT"] = "10.178.111.33"
+		self.bd_to_ip["GIS_PTM"] = "10.178.111.49"
+		self.bd_to_ip["GIS_DST"] = "10.178.111.65"
+		self.bd_to_ip["GIS_MMP"] = "10.178.111.81"
 
 		if not os.path.isfile(self.filename):
 			logging.error(" File %s not found" % self.filename)
