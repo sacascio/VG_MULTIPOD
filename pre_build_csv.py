@@ -275,7 +275,7 @@ class Excel:
 
 			# 6C - create cluster interfaces - depending if symmetric or non symmetric PBR being used
 			if short_tenant + "_" + vrf in self.list_of_non_symm_vrf:
-				self.build_cluster_interfaces_6cNoSymm(short_tenant, vrf, vfw, vrf_to_fw)
+				self.build_cluster_interfaces_6cNoSymm(short_tenant, vrf, vrf_to_fw)
 				logging.info("%s_%s building concrete devices for non symmetric PBR" % (short_tenant, vrf))
 			else:
 				self.build_cluster_interfaces_6cSymm(short_tenant, vrf, vrf_to_fw)
