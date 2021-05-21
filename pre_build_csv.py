@@ -102,7 +102,7 @@ class Excel:
 		f.close()
 
 		f = open("10-NoSymm.csv", "a")
-		f.write("TENANT,PBRNAME,REDIRECTIP1,REDIRECTMAC1" + "\n")
+		f.write("TENANT,PBRNAME,REDIRECTIP,REDIRECTMAC" + "\n")
 		f.close()
 
 		f = open("12.csv", "a")
