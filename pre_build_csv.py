@@ -70,62 +70,62 @@ class Excel:
 		logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 		# Remove all csv files
-		os.system("rm *.csv")
+		os.system("rm PBR_CSV/*.csv")
 
 		# Build headers for the CSVs
-		f = open("6a.csv", "a")
+		f = open("PBR_CSV/6a.csv", "a")
 		f.write("TENANT,FW,VMMDOMAIN" + "\n")
 		f.close()
 
-		f = open("6b.csv", "a")
+		f = open("PBR_CSV/6b.csv", "a")
 		f.write("TENANT,FW,VM,VMInterface,VMAdapterName,DEVICE,VCENTER_CONTROLLER" + "\n")
 		f.close()
 
-		f = open("6c-Symm.csv", "a")
+		f = open("PBR_CSV/6c-Symm.csv", "a")
 		f.write("TENANT,FW,VMInterface1,VMInterface2,VMInterface3,VMInterface4,CLUSTERNAME,CLUSTERDEVICE1,CLUSTERDEVICE2,CLUSTERDEVICE3,CLUSTERDEVICE4" + "\n")
 		f.close()
 
-		f = open("6c-NoSymm.csv", "a")
+		f = open("PBR_CSV/6c-NoSymm.csv", "a")
 		f.write("TENANT,FW,VMInterface1,VMInterface2,CLUSTERNAME,CLUSTERDEVICE1,CLUSTERDEVICE2" + "\n")
 		f.close()
 
-		f = open("7.csv", "a")
+		f = open("PBR_CSV/7.csv", "a")
 		f.write("TENANT,SGNAME,FW" + "\n")
 		f.close()
 
-		f = open("8.csv", "a")
+		f = open("PBR_CSV/8.csv", "a")
 		f.write("TENANT,HGNAME" + "\n")
 		f.close()
 
-		f = open("10-Symm.csv", "a")
+		f = open("PBR_CSV/10-Symm.csv", "a")
 		f.write("TENANT,PBRNAME,REDIRECTIP1,REDIRECTMAC1,REDIRECTIP2,REDIRECTMAC2,HEALTHGRP1,HEALTHGRP2,SLAPOLICY" + "\n")
 		f.close()
 
-		f = open("10-NoSymm.csv", "a")
+		f = open("PBR_CSV/10-NoSymm.csv", "a")
 		f.write("TENANT,PBRNAME,REDIRECTIP,REDIRECTMAC" + "\n")
 		f.close()
 
-		f = open("12.csv", "a")
+		f = open("PBR_CSV/12.csv", "a")
 		f.write("TENANT,CONTRACT_NAME,SGNAME,NODENAME,FW,BD,PBR_POLICY,CLUSTER" + "\n")
 		f.close()
 
-		f = open("13.csv", "a")
+		f = open("PBR_CSV/13.csv", "a")
 		f.write("TENANT,CONTRACT_NAME,SGNAME,SUBJECT" + "\n")
 		f.close()
 
 
 	def build_virtual_device_6a(self,short_tenant,vrf,vmmd):
-		f = open("6a.csv", "a")
+		f = open("PBR_CSV/6a.csv", "a")
 		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + vmmd + "\n")
 		f.close()
 
 	def build_virtual_interfaces_6b(self,short_tenant,vrf,vfw,fwinterface,vnic,vccontroller):
-		f = open("6b.csv", "a")
+		f = open("PBR_CSV/6b.csv", "a")
 		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + vfw + "," +  "CDI_" + vfw + "_" + fwinterface + "," + "Network adapter " + vnic + "," "CDV_" + short_tenant + "_L4L7_" + vfw + "," + vccontroller + "\n")
 		f.close()
 
 	def build_cluster_interfaces_6cSymm(self,short_tenant,vrf,vrf_to_fw):
-		f = open("6c-Symm.csv", "a")
+		f = open("PBR_CSV/6c-Symm.csv", "a")
 		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," )
 
 		# Print interfaces 1-4
@@ -142,7 +142,7 @@ class Excel:
 		f.close()
 
 	def build_cluster_interfaces_6cNoSymm(self,short_tenant,vrf,vrf_to_fw):
-		f = open("6c-NoSymm.csv", "a")
+		f = open("PBR_CSV/6c-NoSymm.csv", "a")
 		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," )
 
 		# Print interfaces 1-2
@@ -159,17 +159,17 @@ class Excel:
 		f.close()
 
 	def build_sgtemplate_7(self,short_tenant,vrf):
-		f = open("7.csv", "a")
+		f = open("PBR_CSV/7.csv", "a")
 		f.write("TNT_SWP_" + short_tenant + "," + "SGT_" + short_tenant + "_PBR_" + vrf + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "\n")
 		f.close()
 
 	def build_healthgroup_8(self,short_tenant,vrf,vfw):
-		f = open("8.csv", "a")
+		f = open("PBR_CSV/8.csv", "a")
 		f.write("TNT_SWP_" + short_tenant + "," + "RHG_" + vfw + "_" + vrf + "\n")
 		f.close()
 
 	def build_pbr_policy_10Symm(self,short_tenant,vrf,fwlist):
-		f = open("10-Symm.csv", "a")
+		f = open("PBR_CSV/10-Symm.csv", "a")
 		short_fw = fwlist[0][:-3]
 
 		try:
@@ -186,7 +186,7 @@ class Excel:
 		f.close()
 
 	def build_pbr_policy_10NoSymm(self,short_tenant,vrf,fwlist):
-		f = open("10-NoSymm.csv", "a")
+		f = open("PBR_CSV/10-NoSymm.csv", "a")
 		short_fw = fwlist[0][:-3]
 
 		try:
@@ -203,12 +203,12 @@ class Excel:
 		f.close()
 
 	def build_device_selection_policy_12(self,short_tenant,vrf,vfw):
-		f = open("12.csv","a")
+		f = open("PBR_CSV/12.csv","a")
 		f.write("TNT_SWP_" + short_tenant + "," + "SGC_SWP_" + short_tenant + "_PBR_" + vrf + "," + "SGT_" + short_tenant + "_PBR_" + vrf + "," + self.node + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + "SBD_SWP_" + short_tenant + "_PBR_" + vrf + "," + "PBR_" + short_tenant + "_L4L7_" + vfw + "_" + vrf + "," + "CLS_" + short_tenant + "_PFW_" + vrf + "\n")
 		f.close()
 
 	def assign_sg_to_contract_13(self,short_tenant,vrf):
-		f = open("13.csv", "a")
+		f = open("PBR_CSV/13.csv", "a")
 		f.write("TNT_SWP_" + short_tenant + "," + "SGC_SWP_" + short_tenant + "_PBR_" + vrf + "," + "SGT_" + short_tenant + "_PBR_" + vrf + "," +  self.subject + "\n")
 		f.close()
 

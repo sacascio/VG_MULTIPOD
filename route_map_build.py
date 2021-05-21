@@ -16,8 +16,8 @@ class Excel:
 		self.lisa_file = "DC1_DC2_BGP-RouteControl_v2.xlsx"
 
 	def build_match_rule_1(self):
-		os.system("rm 1-MR.csv")
-		f = open("1-MR.csv", "a")
+		os.system("rm ROUTE_MAP_CSV/1-MR.csv")
+		f = open("ROUTE_MAP_CSV/1-MR.csv", "a")
 		f.write("TENANT" + "\n")
 		f.write("TNT_SWP_SDE" + "\n")
 		f.write("TNT_SWP_SOE" + "\n")
@@ -26,8 +26,8 @@ class Excel:
 
 	def build_csv_2_7(self):
 		worksheets = []
-		os.system("rm 2-7.csv")
-		f = open("2-7.csv", "a")
+		os.system("rm ROUTE_MAP_CSV/2-7.csv")
+		f = open("ROUTE_MAP_CSV/2-7.csv", "a")
 		f.write("TENANT,VRF,ASN1,ASN2,ASN3" + "\n")
 		wb = openpyxl.load_workbook(self.lisa_file, data_only=True)
 
@@ -125,8 +125,8 @@ class Excel:
 
 	def build_csv_8(self, as_built_paths):
 		worksheets = []
-		os.system("rm 8-RM.csv")
-		f = open("8-RM.csv", "a")
+		os.system("rm ROUTE_MAP_CSV/8-RM.csv")
+		f = open("ROUTE_MAP_CSV/8-RM.csv", "a")
 		f.write("TENANT,VRF,L3OUT,LNP,LIP,PATH,RM,DIRECTION" + "\n")
 		wb = openpyxl.load_workbook(self.lisa_file, data_only=True)
 
