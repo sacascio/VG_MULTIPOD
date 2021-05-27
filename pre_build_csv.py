@@ -113,6 +113,14 @@ class Excel:
 		f.write("TENANT,CONTRACT_NAME,SGNAME,SUBJECT" + "\n")
 		f.close()
 
+		f = open("PBR_CSV/19.csv", "a")
+		f.write("TENANT,FW,CLUSTERNAME" + "\n")
+		f.close()
+
+		f = open("PBR_CSV/20.csv", "a")
+		f.write("TENANT,FW,DEVICE" + "\n")
+		f.close()
+
 
 	def build_virtual_device_6a(self,short_tenant,vrf,vmmd):
 		f = open("PBR_CSV/6a.csv", "a")
@@ -121,7 +129,9 @@ class Excel:
 
 	def build_virtual_interfaces_6b(self,short_tenant,vrf,vfw,fwinterface,vnic,vccontroller):
 		f = open("PBR_CSV/6b.csv", "a")
-		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + vfw + "," +  "CDI_" + vfw + "_" + fwinterface + "," + "Network adapter " + vnic + "," "CDV_" + short_tenant + "_L4L7_" + vfw + "," + vccontroller + "\n")
+		# VFW should be lower case -that's how its built in vCenter.  5-25-2021
+		#f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + vfw + "," +  "CDI_" + vfw + "_" + fwinterface + "," + "Network adapter " + vnic + "," "CDV_" + short_tenant + "_L4L7_" + vfw + "," + vccontroller + "\n")
+		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + vfw.lower() + "," +  "CDI_" + vfw + "_" + fwinterface + "," + "Network adapter " + vnic + "," "CDV_" + short_tenant + "_L4L7_" + vfw + "," + vccontroller + "\n")
 		f.close()
 
 	def build_cluster_interfaces_6cSymm(self,short_tenant,vrf,vrf_to_fw):
@@ -212,6 +222,15 @@ class Excel:
 		f.write("TNT_SWP_" + short_tenant + "," + "SGC_SWP_" + short_tenant + "_PBR_" + vrf + "," + "SGT_" + short_tenant + "_PBR_" + vrf + "," +  self.subject + "\n")
 		f.close()
 
+	def build_delete_cluster_19(self,short_tenant,vrf):
+		f = open("PBR_CSV/19.csv", "a")
+		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + "CLS_" + short_tenant + "_PFW_" + vrf + "\n")
+		f.close()
+
+	def build_delete_interfaces_20(self,short_tenant,vrf,vfw):
+		f = open("PBR_CSV/20.csv", "a")
+		f.write("TNT_SWP_" + short_tenant + "," + "SVD_" + short_tenant + "_PFW_" + vrf + "," + "CDV_" + short_tenant + "_L4L7_" + vfw + "\n")
+		f.close()
 
 	def parse_excel(self):
 		worksheets = []
@@ -265,6 +284,9 @@ class Excel:
 				if vfw not in vrf_to_fw[short_tenant + "_" + vrf]:
 					vrf_to_fw[short_tenant + "_" + vrf].append([vfw,vnic,fwinterface])
 
+				#20 build delete L4L7 interfaces NO PATH
+				self.build_delete_interfaces_20(short_tenant,vrf,vfw)
+
 		for tenant_vrf in vrf_to_fw:
 			tvdata = tenant_vrf.split("_")
 			short_tenant = tvdata[0]
@@ -306,6 +328,9 @@ class Excel:
 
 			# 13 - Assign SGT to contract
 			self.assign_sg_to_contract_13(short_tenant,vrf)
+
+			# 19 - Assign SGT to contract
+			self.build_delete_cluster_19(short_tenant,vrf)
 
 		# part 2 -  build CSVs that require line by line analysis
 
