@@ -237,6 +237,67 @@ class Excel:
 		f.close()
 
 
+	def updateRtrID_10(self, as_built_paths):
+		worksheets = []
+		lnp_map = {}
+		os.system("rm ROUTE_MAP_CSV/10.csv")
+		f = open("ROUTE_MAP_CSV/10.csv", "a")
+		f.write("TENANT,L3OUT,LNP,PODID,NODEID,RTRID" + "\n")
+		wb = openpyxl.load_workbook(self.lisa_file, data_only=True)
+
+		for sheet in wb:
+			worksheets.append(sheet.title)
+		wb.close()
+
+		wb.active = worksheets.index("BGP Connectivity Profiles")
+		ws = wb.active
+
+		row_start = ws.min_row
+		row_end = ws.max_row
+
+		for x in range(row_start + 1, row_end + 1):
+			cell_tenant = 'A' + str(x)
+			tenant = ws[cell_tenant].value
+
+			if tenant is None:
+				continue
+
+			cell_lnp = 'C' + str(x)
+			lnp = ws[cell_lnp].value
+
+			cell_lip = 'D' + str(x)
+			lip = ws[cell_lip].value
+
+			cell_peer = 'E' + str(x)
+			peer = ws[cell_peer].value
+
+			l3o = lnp
+			l3o = l3o.replace("LNP_DC1_","")
+			l3o = l3o.replace("LNP_DC2_","")
+
+			path = as_built_paths[tenant][l3o][lnp][lip][peer]
+			m = re.search('pod-(\d)/', path)
+			podid = m.group(1)
+
+			m = re.search('paths-(\d+)/', path)
+			nodeid = m.group(1)
+
+			if lnp in lnp_map:
+				if podid in lnp_map[lnp]:
+					if nodeid in lnp_map[lnp][podid]:
+						continue
+					else:
+						lnp_map[lnp][podid][nodeid] = {}
+						rtrid='1.1.1.1'
+						f.write(tenant + "," + l3o + "," + lnp + "," + podid + "," + nodeid + "," + rtrid +  "\n")
+				else:
+					lnp_map[lnp][podid] = {}
+			else:
+				lnp_map[lnp] = {}
+
+
+		f.close()
+
 def main():
 	data = Excel()
 	data.build_match_rule_1()
@@ -244,6 +305,7 @@ def main():
 	as_built_paths = data.load_l3o_path_from_asbuilt()
 	data.build_csv_8(as_built_paths)
 	data.build_enable_loopback_9(as_built_paths)
+	data.updateRtrID_10(as_built_paths)
 
 if __name__ == '__main__':
     main()
