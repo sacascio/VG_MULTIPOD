@@ -15,6 +15,7 @@ class Excel:
 		self.as_built = "VG_MP_AsBuilt.xlsx"
 		self.lisa_file = "DC1_DC2_BGP-RouteControl_v2.xlsx"
 
+
 	def build_match_rule_1(self):
 		os.system("rm ROUTE_MAP_CSV/1-MR.csv")
 		f = open("ROUTE_MAP_CSV/1-MR.csv", "a")
@@ -72,6 +73,58 @@ class Excel:
 						f.write(tenant + "," + vrf + "," + str(asn) + "," + str(asn) + "," + str(asn) + '\n')
 
 		f.close()
+
+	def get_rtr_ids(self,lcs):
+
+		worksheets = []
+		wb = openpyxl.load_workbook(lcs, data_only=True)
+
+		for sheet in wb:
+			worksheets.append(sheet.title)
+		wb.close()
+
+		wb.active = worksheets.index("Router IDs")
+		ws = wb.active
+
+		row_start = ws.min_row
+		row_end = ws.max_row
+
+		rtr_ids = {}
+
+		for x in range(row_start + 1, row_end + 1):
+
+			nodeiddc1_cell = 'C' + str(x)
+			nodeid_dc1 = ws[nodeiddc1_cell].value
+
+			if nodeid_dc1 is None or ( nodeid_dc1 != 1301 and nodeid_dc1 != 1302 ):
+				continue
+
+			rtrIddc1_cell = 'D' + str(x)
+			rtrIddc1 = ws[rtrIddc1_cell].value
+
+			vrf_cell = 'E' + str(x)
+			vrf = ws[vrf_cell].value
+
+			vrf = vrf.replace('VRF_SWP_','')
+
+			nodeiddc2_cell = 'G' + str(x)
+			nodeid_dc2 = ws[nodeiddc2_cell].value
+			nodeid_dc2 = nodeid_dc2.replace('Node-','')
+
+			rtrIddc2_cell = 'H' + str(x)
+			rtrIddc2 = ws[rtrIddc2_cell].value
+
+			if vrf not in rtr_ids:
+				rtr_ids[vrf] = {}
+
+			if nodeid_dc1 not in rtr_ids[vrf]:
+				rtr_ids[vrf][str(nodeid_dc1)] = rtrIddc1
+
+			if nodeid_dc2 not in rtr_ids[vrf]:
+				rtr_ids[vrf][str(nodeid_dc2)] = rtrIddc2
+
+		return rtr_ids
+
 
 	def load_l3o_path_from_asbuilt(self):
 
@@ -237,7 +290,7 @@ class Excel:
 		f.close()
 
 
-	def updateRtrID_10(self, as_built_paths):
+	def updateRtrID_10(self, as_built_paths,rtrIds):
 		worksheets = []
 		lnp_map = {}
 		os.system("rm ROUTE_MAP_CSV/10.csv")
@@ -275,6 +328,10 @@ class Excel:
 			l3o = l3o.replace("LNP_DC1_","")
 			l3o = l3o.replace("LNP_DC2_","")
 
+			short_vrf = l3o
+			short_vrf = short_vrf.replace('L3O_SWP_','')
+			short_vrf = short_vrf.replace('_CORE','')
+
 			path = as_built_paths[tenant][l3o][lnp][lip][peer]
 			m = re.search('pod-(\d)/', path)
 			podid = m.group(1)
@@ -288,7 +345,7 @@ class Excel:
 						continue
 					else:
 						lnp_map[lnp][podid][nodeid] = {}
-						rtrid='1.1.1.1'
+						rtrid=rtrIds[short_vrf][nodeid]
 						f.write(tenant + "," + l3o + "," + lnp + "," + podid + "," + nodeid + "," + rtrid +  "\n")
 				else:
 					lnp_map[lnp][podid] = {}
@@ -298,14 +355,22 @@ class Excel:
 
 		f.close()
 
+def read_arguments():
+	parser = argparse.ArgumentParser("Usage: ./route_map_build.py -f <LCS File>")
+	parser.add_argument("-f", "--input-file", dest="filename" , help="LCS xlsx file", required=True)
+	args = parser.parse_args()
+	return args
+
 def main():
+	args = read_arguments()
 	data = Excel()
 	data.build_match_rule_1()
 	data.build_csv_2_7()
 	as_built_paths = data.load_l3o_path_from_asbuilt()
 	data.build_csv_8(as_built_paths)
 	data.build_enable_loopback_9(as_built_paths)
-	data.updateRtrID_10(as_built_paths)
+	rtrIds = data.get_rtr_ids(args.filename)
+	data.updateRtrID_10(as_built_paths,rtrIds)
 
 if __name__ == '__main__':
     main()
