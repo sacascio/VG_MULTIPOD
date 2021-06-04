@@ -229,6 +229,54 @@ class Excel:
 
 		f.close()
 
+	def build_csv_bgp_password_11(self, as_built_paths):
+		worksheets = []
+		os.system("rm ROUTE_MAP_CSV/11.csv")
+		f = open("ROUTE_MAP_CSV/11.csv", "a")
+		f.write("TENANT,L3OUT,LNP,LIP,PATH,BGPPASSWORD" + "\n")
+		wb = openpyxl.load_workbook(self.lisa_file, data_only=True)
+
+		for sheet in wb:
+			worksheets.append(sheet.title)
+		wb.close()
+
+		wb.active = worksheets.index("BGP Connectivity Profiles")
+		ws = wb.active
+
+		row_start = ws.min_row
+		row_end = ws.max_row
+
+		for x in range(row_start + 1, row_end + 1):
+			cell_tenant = 'A' + str(x)
+			tenant = ws[cell_tenant].value
+
+			if tenant is None:
+				continue
+
+			cell_lnp = 'C' + str(x)
+			lnp = ws[cell_lnp].value
+
+			cell_lip = 'D' + str(x)
+			lip = ws[cell_lip].value
+
+			cell_peer = 'E' + str(x)
+			peer = ws[cell_peer].value
+
+			cell_direction = 'F' + str(x)
+			direction = ws[cell_direction].value
+
+			cell_rm = 'G' + str(x)
+			rm = ws[cell_rm].value
+
+			l3o = lnp
+			l3o = l3o.replace("LNP_DC1_","")
+			l3o = l3o.replace("LNP_DC2_","")
+
+			path = "[" + as_built_paths[tenant][l3o][lnp][lip][peer] + "]/peerP-[" + peer + "]"
+			f.write(tenant + "," + l3o + "," + lnp + "," + lip + "," + path + "," + "\n")
+
+		f.close()
+
 	def build_enable_loopback_9(self, as_built_paths):
 		worksheets = []
 		lnp_map = {}
@@ -371,6 +419,7 @@ def main():
 	data.build_enable_loopback_9(as_built_paths)
 	rtrIds = data.get_rtr_ids(args.filename)
 	data.updateRtrID_10(as_built_paths,rtrIds)
+	data.build_csv_bgp_password_11(as_built_paths)
 
 if __name__ == '__main__':
     main()
