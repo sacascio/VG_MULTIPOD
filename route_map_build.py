@@ -403,6 +403,45 @@ class Excel:
 
 		f.close()
 
+	def build_csv_new_mch_rule_13_14(self):
+		worksheets = []
+		os.system("rm ROUTE_MAP_CSV/13-14.csv")
+		f = open("ROUTE_MAP_CSV/13-14.csv", "a")
+		f.write("TENANT,VRF,RM,MCH_RULE" + "\n")
+		wb = openpyxl.load_workbook(self.lisa_file, data_only=True)
+
+		for sheet in wb:
+			worksheets.append(sheet.title)
+		wb.close()
+
+		wb.active = worksheets.index("Route-maps")
+		ws = wb.active
+
+		row_start = ws.min_row
+		row_end = ws.max_row
+
+		vrf_to_asn = {}
+
+		for x in range(row_start + 1, row_end + 1):
+			cell_tenant = 'A' + str(x)
+			tenant = ws[cell_tenant].value
+
+			if tenant is None:
+				continue
+
+			cell_route_map = 'B' + str(x)
+			route_map = ws[cell_route_map].value
+
+			a_cell_rule_val = route_map.split("_")
+			vrf = a_cell_rule_val[1]
+
+			if bool(re.search('_IN$', route_map)):
+				f.write(tenant + "," + vrf + "," + route_map + "," + 'MCH_INBOUND' + '\n')
+			else:
+				f.write(tenant + "," + vrf + "," + route_map + "," + 'MCH_OUTBOUND' + '\n')
+
+		f.close()
+
 def read_arguments():
 	parser = argparse.ArgumentParser("Usage: ./route_map_build.py -f <LCS File>")
 	parser.add_argument("-f", "--input-file", dest="filename" , help="LCS xlsx file", required=True)
@@ -420,6 +459,7 @@ def main():
 	rtrIds = data.get_rtr_ids(args.filename)
 	data.updateRtrID_10(as_built_paths,rtrIds)
 	data.build_csv_bgp_password_11(as_built_paths)
+	data.build_csv_new_mch_rule_13_14()
 
 if __name__ == '__main__':
     main()
