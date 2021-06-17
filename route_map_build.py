@@ -403,10 +403,49 @@ class Excel:
 
 		f.close()
 
-	def build_csv_new_mch_rule_13_14(self):
+	def enable_import_route_control_14(self):
 		worksheets = []
-		os.system("rm ROUTE_MAP_CSV/13-14.csv")
-		f = open("ROUTE_MAP_CSV/13-14.csv", "a")
+		l3o_hash = {}
+		os.system("rm ROUTE_MAP_CSV/14.csv")
+		f = open("ROUTE_MAP_CSV/14.csv", "a")
+		f.write("TENANT,L3OUT" + "\n")
+		wb = openpyxl.load_workbook(self.lisa_file, data_only=True)
+
+		for sheet in wb:
+			worksheets.append(sheet.title)
+		wb.close()
+
+		wb.active = worksheets.index("BGP Connectivity Profiles")
+		ws = wb.active
+
+		row_start = ws.min_row
+		row_end = ws.max_row
+
+		for x in range(row_start + 1, row_end + 1):
+			cell_tenant = 'A' + str(x)
+			tenant = ws[cell_tenant].value
+
+			if tenant is None:
+				continue
+
+			cell_lnp = 'C' + str(x)
+			lnp = ws[cell_lnp].value
+
+			l3o = lnp
+			l3o = l3o.replace("LNP_DC1_","")
+			l3o = l3o.replace("LNP_DC2_","")
+			if l3o not in l3o_hash:
+				f.write(tenant + "," + l3o + "\n")
+				l3o_hash[l3o] = {}
+
+
+		f.close()
+
+
+	def build_csv_new_mch_rule_13_15(self):
+		worksheets = []
+		os.system("rm ROUTE_MAP_CSV/13_15.csv")
+		f = open("ROUTE_MAP_CSV/13_15.csv", "a")
 		f.write("TENANT,VRF,RM,MCH_RULE" + "\n")
 		wb = openpyxl.load_workbook(self.lisa_file, data_only=True)
 
@@ -459,7 +498,8 @@ def main():
 	rtrIds = data.get_rtr_ids(args.filename)
 	data.updateRtrID_10(as_built_paths,rtrIds)
 	data.build_csv_bgp_password_11(as_built_paths)
-	data.build_csv_new_mch_rule_13_14()
+	data.build_csv_new_mch_rule_13_15()
+	data.enable_import_route_control_14()
 
 if __name__ == '__main__':
     main()
