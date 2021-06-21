@@ -442,10 +442,10 @@ class Excel:
 		f.close()
 
 
-	def build_csv_new_mch_rule_13_15(self):
+	def build_csv_new_mch_rule_13_17(self):
 		worksheets = []
-		os.system("rm ROUTE_MAP_CSV/13_15.csv")
-		f = open("ROUTE_MAP_CSV/13_15.csv", "a")
+		os.system("rm ROUTE_MAP_CSV/13_17.csv")
+		f = open("ROUTE_MAP_CSV/13_17.csv", "a")
 		f.write("TENANT,VRF,RM,MCH_RULE" + "\n")
 		wb = openpyxl.load_workbook(self.lisa_file, data_only=True)
 
@@ -481,6 +481,96 @@ class Excel:
 
 		f.close()
 
+	def build_dc2_set_bgp_in_15(self):
+		worksheets = []
+		os.system("rm ROUTE_MAP_CSV/15.csv")
+		f = open("ROUTE_MAP_CSV/15.csv", "a")
+		f.write("TENANT,VRF" + "\n")
+		wb = openpyxl.load_workbook(self.lisa_file, data_only=True)
+
+		for sheet in wb:
+			worksheets.append(sheet.title)
+		wb.close()
+
+		wb.active = worksheets.index("Set Rules")
+		ws = wb.active
+
+		row_start = ws.min_row
+		row_end = ws.max_row
+
+		for x in range(row_start + 1, row_end + 1):
+			cell_type = 'C' + str(x)
+			cell_type_val = ws[cell_type].value
+
+			if cell_type_val is None:
+				continue
+
+			cell_rule = 'B' + str(x)
+			cell_rule_val = ws[cell_rule].value
+
+			cell_tenant = 'A' + str(x)
+			tenant = ws[cell_tenant].value
+
+			# use local-pref to get all VRFs
+			if cell_type_val == 'local-pref':
+				a_cell_rule_val = cell_rule_val.split("_")
+				vrf = a_cell_rule_val[1]
+				f.write(tenant + "," + vrf + '\n')
+
+		f.close()
+
+	def build_apply_dc2_bgp_in_16(self, as_built_paths):
+		worksheets = []
+		os.system("rm ROUTE_MAP_CSV/16.csv")
+		f = open("ROUTE_MAP_CSV/16.csv", "a")
+		f.write("TENANT,VRF,L3OUT,LNP,LIP,PATH,RM" + "\n")
+		wb = openpyxl.load_workbook(self.lisa_file, data_only=True)
+
+		for sheet in wb:
+			worksheets.append(sheet.title)
+		wb.close()
+
+		wb.active = worksheets.index("BGP Connectivity Profiles")
+		ws = wb.active
+
+		row_start = ws.min_row
+		row_end = ws.max_row
+
+		for x in range(row_start + 1, row_end + 1):
+			cell_tenant = 'A' + str(x)
+			tenant = ws[cell_tenant].value
+
+			if tenant is None:
+				continue
+
+			cell_lnp = 'C' + str(x)
+			lnp = ws[cell_lnp].value
+
+			cell_lip = 'D' + str(x)
+			lip = ws[cell_lip].value
+
+			cell_peer = 'E' + str(x)
+			peer = ws[cell_peer].value
+
+			cell_direction = 'F' + str(x)
+			direction = ws[cell_direction].value
+
+			l3o = lnp
+			l3o = l3o.replace("LNP_DC1_","")
+			l3o = l3o.replace("LNP_DC2_","")
+
+			a_vrf = lip
+			x_vrf = a_vrf.split("_")
+			vrf = x_vrf[-2]
+
+			rm = "RMP_" + vrf + "_DC2_SET_BGP_IN"
+
+			if bool(re.search('DC2', lnp)):
+				path = "[" + as_built_paths[tenant][l3o][lnp][lip][peer] + "]/peerP-[" + peer + "]"
+				f.write(tenant + "," + vrf + "," + l3o + "," + lnp + "," + lip + "," + path + "," + rm + "\n")
+		f.close()
+
+
 def read_arguments():
 	parser = argparse.ArgumentParser("Usage: ./route_map_build.py -f <LCS File>")
 	parser.add_argument("-f", "--input-file", dest="filename" , help="LCS xlsx file", required=True)
@@ -498,8 +588,10 @@ def main():
 	rtrIds = data.get_rtr_ids(args.filename)
 	data.updateRtrID_10(as_built_paths,rtrIds)
 	data.build_csv_bgp_password_11(as_built_paths)
-	data.build_csv_new_mch_rule_13_15()
+	data.build_csv_new_mch_rule_13_17()
 	data.enable_import_route_control_14()
+	data.build_dc2_set_bgp_in_15()
+	data.build_apply_dc2_bgp_in_16(as_built_paths)
 
 if __name__ == '__main__':
     main()
